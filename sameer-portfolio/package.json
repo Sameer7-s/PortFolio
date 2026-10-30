@@ -1,0 +1,8 @@
+{
+  "name": "sameer-portfolio",
+  "version": "1.0.0",
+  "description": "Sameer's Portfolio Website",
+  "scripts": {
+    "start": "npx --yes serve -l 8000 ."
+  }
+}
