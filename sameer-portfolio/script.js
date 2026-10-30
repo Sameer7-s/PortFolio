@@ -43,13 +43,15 @@ if (header) {
   handleScroll();
 }
 
-// Reveal animation on scroll
+// Reveal animation on scroll with subtle stagger
 const revealEls = document.querySelectorAll(".reveal");
 if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
+        setTimeout(() => {
+          entry.target.classList.add("is-visible");
+        }, (index % 4) * 60);
         observer.unobserve(entry.target);
       }
     });
@@ -57,6 +59,58 @@ if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-mot
   revealEls.forEach(el => observer.observe(el));
 } else {
   revealEls.forEach(el => el.classList.add("is-visible"));
+}
+
+// Interactive subtle 3D card tilt for desktop devices
+if (window.matchMedia("(pointer: fine)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const cards = document.querySelectorAll(".project-card, .card-box");
+  cards.forEach(card => {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -3;
+      const rotateY = ((x - centerX) / centerX) * 3;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "";
+    });
+  });
+}
+
+// Animated counter for fact numbers on scroll
+const factNumbers = document.querySelectorAll(".fact-number");
+if (factNumbers.length && "IntersectionObserver" in window) {
+  const factObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        factNumbers.forEach(el => {
+          const text = el.textContent.trim();
+          if (text === "03") {
+            let count = 0;
+            const timer = setInterval(() => {
+              count++;
+              el.textContent = count < 10 ? `0${count}` : `${count}`;
+              if (count >= 3) clearInterval(timer);
+            }, 120);
+          } else if (text === "2028") {
+            let year = 2024;
+            const timer = setInterval(() => {
+              year++;
+              el.textContent = `${year}`;
+              if (year >= 2028) clearInterval(timer);
+            }, 60);
+          }
+        });
+        factObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  const factRow = document.querySelector(".fact-row");
+  if (factRow) factObserver.observe(factRow);
 }
 
 // Contact form handling if present
